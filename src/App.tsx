@@ -7,6 +7,9 @@ import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Send, Music, MessageSquare, Volume2, ListMusic, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
+import Player from './components/Player';
+import Chat from './components/Chat';
+import Playlist from './components/Playlist';
 
 interface Song {
   id: string;
@@ -255,155 +258,39 @@ export default function App() {
                 exit={{ opacity: 0 }}
                 className="flex-1 flex flex-col items-center justify-center space-y-4"
               >
-                <Loader2 className="w-12 h-12 text-white/60 animate-spin" />
+                <Loader2 className="w-12 h-12 text-blue-400 animate-spin" />
                 <p className="text-white/60 font-medium">Đang tải nhạc từ Drive...</p>
               </motion.div>
             ) : !showPlaylist && !isChatOpen ? (
-              <motion.div 
-                key="player"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex-1 flex flex-col items-center justify-center space-y-8"
-              >
-                {/* Album Art - Circular & Spinning */}
-                <div className="relative">
-                  <motion.div 
-                    className={`relative w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.3)] border-4 border-white/10 ${isPlaying ? 'animate-spin-slow' : ''}`}
-                  >
-                    <img 
-                      src={currentSong?.cover || BACKGROUND_IMAGE} 
-                      alt={currentSong?.title || "No Song"} 
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  </motion.div>
-                  {/* Center Hole for Vinyl Look */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/80 border border-white/20 z-20" />
-                </div>
-
-                {/* Song Info */}
-                <div className="text-center space-y-2">
-                  <h2 className="text-2xl font-bold tracking-tight text-white line-clamp-1">{currentSong?.title || "Chưa có nhạc"}</h2>
-                  <p className="text-white/60 font-medium">{currentSong?.artist || "Vui lòng kiểm tra Drive"}</p>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="w-full space-y-2">
-                  <div className="relative w-full h-1 bg-white/20 rounded-full overflow-hidden">
-                    <motion.div 
-                      className="absolute top-0 left-0 h-full bg-white"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={progress}
-                    onChange={handleSeek}
-                    className="absolute w-full h-1 opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="flex justify-between text-[10px] font-mono text-white/40">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
-                </div>
-
-                {/* Controls */}
-                <div className="flex items-center justify-center space-x-8">
-                  <button onClick={prevSong} className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white/80 hover:bg-white/20 transition-all">
-                    <SkipBack className="w-6 h-6 fill-current" />
-                  </button>
-                  <button 
-                    onClick={togglePlay}
-                    className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white shadow-xl hover:scale-105 active:scale-95 transition-all border border-white/20"
-                  >
-                    {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
-                  </button>
-                  <button onClick={nextSong} className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white/80 hover:bg-white/20 transition-all">
-                    <SkipForward className="w-6 h-6 fill-current" />
-                  </button>
-                </div>
-              </motion.div>
+              <Player 
+                currentSong={currentSong}
+                isPlaying={isPlaying}
+                progress={progress}
+                currentTime={currentTime}
+                duration={duration}
+                togglePlay={togglePlay}
+                nextSong={nextSong}
+                prevSong={prevSong}
+                handleSeek={handleSeek}
+                formatTime={formatTime}
+              />
             ) : showPlaylist ? (
-              <motion.div 
-                key="playlist"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="flex-1 flex flex-col"
-              >
-                <h3 className="text-xl font-bold mb-6">Playlist ({songs.length})</h3>
-                <div className="flex-1 overflow-y-auto scrollbar-hide space-y-2">
-                  {songs.map((song, idx) => (
-                    <button
-                      key={song.id}
-                      onClick={() => {
-                        setCurrentSongIndex(idx);
-                        setIsPlaying(true);
-                        setShowPlaylist(false);
-                      }}
-                      className={`w-full p-4 rounded-2xl flex items-center justify-between transition-all ${
-                        currentSongIndex === idx ? 'bg-white/20' : 'bg-white/5 hover:bg-white/10'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-4 flex-1">
-                        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10">
-                          <img src={song.cover} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        </div>
-                        <div className="flex-1 text-left">
-                          <p className="font-semibold text-sm line-clamp-1">{song.title}</p>
-                        </div>
-                      </div>
-                      {currentSongIndex === idx && isPlaying && (
-                        <div className="flex space-x-1 items-end h-5 ml-4">
-                          <div className="wave-bar" />
-                          <div className="wave-bar" />
-                          <div className="wave-bar" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
+              <Playlist 
+                songs={songs}
+                currentSongIndex={currentSongIndex}
+                isPlaying={isPlaying}
+                setCurrentSongIndex={setCurrentSongIndex}
+                setIsPlaying={setIsPlaying}
+                setShowPlaylist={setShowPlaylist}
+              />
             ) : (
-              <motion.div 
-                key="chat"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="flex-1 flex flex-col glass-dark rounded-3xl p-4"
-              >
-                <div className="flex-1 overflow-y-auto scrollbar-hide space-y-4 mb-4 pr-2">
-                  {messages.map((msg, i) => (
-                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                        msg.role === 'user' ? 'bg-white text-black' : 'bg-white/10 text-white'
-                      }`}>
-                        {msg.text}
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </div>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Hỏi AI hoặc yêu cầu nhạc..."
-                    className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-white/30"
-                  />
-                  <button 
-                    onClick={handleSendMessage}
-                    className="p-2 bg-white text-black rounded-xl hover:scale-105 transition-transform"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                </div>
-              </motion.div>
+              <Chat 
+                messages={messages}
+                userInput={userInput}
+                setUserInput={setUserInput}
+                handleSendMessage={handleSendMessage}
+                chatEndRef={chatEndRef}
+              />
             )}
           </AnimatePresence>
         </div>

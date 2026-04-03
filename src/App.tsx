@@ -18,7 +18,7 @@ interface Song {
 
 const API_KEY = "AIzaSyB6Bw7_M0WXcWovc3lMs3muVsywPNlWrrg";
 const FOLDER_ID = "167xYED5mEmnl0-N9FDt2vO-SMhAYpNJW";
-const BACKGROUND_IMAGE = "https://i.postimg.cc/nVjhf5BJ/xinh-lao.jpg";
+const BACKGROUND_IMAGE = "https://i.postimg.cc/kM2xbdYk/XINHLAO.jpg";
 
 export default function App() {
   const [songs, setSongs] = useState<Song[]>([]);
@@ -29,7 +29,7 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [messages, setMessages] = useState<{ role: 'user' | 'ai', text: string }[]>([
-    { role: 'ai', text: "Chào mừng bạn đến với Music AI PRO! Tôi đang tải nhạc từ Google Drive của bạn..." }
+    { role: 'ai', text: "Chào mừng bạn đến với XinhLao! Tôi đang tải nhạc từ Google Drive của bạn..." }
   ]);
   const [userInput, setUserInput] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -55,7 +55,7 @@ export default function App() {
             .map((file: any) => ({
               id: file.id,
               title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
-              artist: "Google Drive Artist",
+              artist: "Xin chào, đây là nơi “Thanh lý nỗi buồn, giữ lại bình yên.” là nơi mất tiền để cảm xúc được thả trôi.”",
               src: `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`,
               cover: BACKGROUND_IMAGE // Using the main image as cover for all for that "PRO" look
             }));
@@ -211,7 +211,7 @@ export default function App() {
     <div className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black">
       {/* Background with Blur */}
       <div 
-        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-110"
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-110 blur-sm"
         style={{ backgroundImage: `url(${BACKGROUND_IMAGE})` }}
       />
       <div className="absolute inset-0 backdrop-blur-3xl bg-black/40" />
@@ -228,7 +228,12 @@ export default function App() {
             <ListMusic className="w-6 h-6 text-white/80" />
           </button>
           <div className="text-center">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-semibold">Music AI PRO</p>
+            <pre className="text-[6px] text-white/40 font-mono leading-none">
+              {`╔═╗╦ ╦╔╗╔╦ ╦╦  ╔═╗╔═╗
+╚═╗╠═╣║║║╠═╣║  ╠═╣║ ║
+╚═╝╩ ╩╝╚╝╩ ╩╩═╝╩ ╩╚═╝
+      XinhLao`}
+            </pre>
           </div>
           <button 
             onClick={() => setIsChatOpen(!isChatOpen)}
@@ -411,7 +416,12 @@ export default function App() {
               <div className="w-2/3 h-full bg-white/40" />
             </div>
           </div>
-          <p className="text-[10px] font-mono text-white/20">MUSIC AI PRO v2.0</p>
+          <pre className="text-[6px] font-mono text-white/20 leading-none">
+            {`╔═╗╦ ╦╔╗╔╦ ╦╦  ╔═╗╔═╗
+╚═╗╠═╣║║║╠═╣║  ╠═╣║ ║
+╚═╝╩ ╩╝╚╝╩ ╩╩═╝╩ ╩╚═╝
+      XinhLao`}
+          </pre>
         </footer>
 
         {/* Audio Element */}
